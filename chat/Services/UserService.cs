@@ -2,8 +2,8 @@
 using chat.Dto;
 using chat.DTO;
 using chat.Entities;
+using chat.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -38,7 +38,7 @@ namespace chat.Services
             User user = await AsyncGetOneUser(id);
             if (user == null)
             {
-                throw new ArgumentException("User not found");
+                throw new NotFoundException("User not found");
             }
 
             _context.Users.Remove(user);
@@ -51,22 +51,27 @@ namespace chat.Services
             return users.OrderBy(s => s.Id).Skip(query.Skip).Take(query.Take);
         }
 
-        public Task<User> AsyncGetOneUser(int id)
+        public async Task<User> AsyncGetOneUser(int id)
         {
-            return _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            User user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+            return user;
         }
 
         public async Task<User> AsyncUpdateOneUser(int id, UpdateUserDto updateUserDto)
         {
             if (updateUserDto.Description == null && updateUserDto.Name == null)
             {
-                throw new ArgumentException("Nothing to modify");
+                throw new BadRequestException("Nothing to modify");
             }
 
             User user = await AsyncGetOneUser(id);
             if (user == null)
             {
-                throw new ArgumentException("User not found");
+                throw new NotFoundException("User not found");
             }
 
             if (updateUserDto.Description != null)

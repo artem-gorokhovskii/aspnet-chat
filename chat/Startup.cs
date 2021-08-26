@@ -1,19 +1,17 @@
 using chat.DAL;
+using chat.Exceptions;
 using chat.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace chat
 {
@@ -46,10 +44,40 @@ namespace chat
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                // app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "chat v1"));
             }
+
+
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+
+            app.UseExceptionHandler(c => c.Run(async context =>
+            {
+                var recievedException = context.Features.Get<IExceptionHandlerPathFeature>().Error;
+
+                BasicException exception = new InternalErrorException("Something went wrong");
+
+                if (recievedException is BasicException)
+                {
+                    exception = (BasicException)recievedException;
+                }
+
+                string result = JsonConvert.SerializeObject(new
+                {
+                    Status = exception.Status,
+                    Code = exception.Code,
+                    Message = exception.Message
+                });
+
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)exception.Status;
+
+                await context.Response.WriteAsync(result);
+            }));
 
             app.UseHttpsRedirection();
 
