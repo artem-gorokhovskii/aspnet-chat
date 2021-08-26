@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace chat.Services
 {
     interface IAuthorizationService
     {
         public string GenerateHashFromPassword(string password);
+
+        public Task<string> AsyncAuthenticate(string login, string password);
     }
 }

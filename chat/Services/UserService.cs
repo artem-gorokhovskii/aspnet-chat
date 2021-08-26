@@ -23,6 +23,13 @@ namespace chat.Services
 
         public async Task<CreatedUserDto> AsyncCreateOneUser(CreateUserDto createUserDto)
         {
+            User existedUser = await AsyncGetUserInstanceByLogin(createUserDto.Login);
+
+            if (existedUser != null)
+            {
+                throw new BadRequestException("User with such login already exists");
+            }
+
             User user = new User()
             {
                 Description = createUserDto.Description,
@@ -36,6 +43,7 @@ namespace chat.Services
 
             CreatedUserDto response = new CreatedUserDto()
             {
+                Id = user.Id,
                 Description = user.Description,
                 Login = user.Login,
                 Name = user.Name
@@ -46,7 +54,7 @@ namespace chat.Services
 
         public async Task AsyncDeleteOneUser(int id)
         {
-            User user = await AsyncGetOneUser(id);
+            User user = await AsyncGetUserInstanceById(id);
             if (user == null)
             {
                 throw new NotFoundException("User not found");
@@ -56,20 +64,24 @@ namespace chat.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<User>> AsyncGetAllUsers(QueryPaginationDto query)
+        public async Task<IEnumerable<GetUserDto>> AsyncGetAllUsers(QueryPaginationDto query)
         {
-            var users = await _context.Users.ToListAsync();
-            return users.OrderBy(s => s.Id).Skip(query.Skip).Take(query.Take);
+            IEnumerable<User> users = await _context.Users.ToListAsync();
+            return users
+                .OrderBy(s => s.Id)
+                .Skip(query.Skip)
+                .Take(query.Take)
+                .Select(x => new GetUserDto() { Id = x.Id, Name = x.Name, Description = x.Description });
         }
 
-        public async Task<User> AsyncGetOneUser(int id)
+        public async Task<GetUserDto> AsyncGetOneUser(int id)
         {
             User user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
             if (user == null)
             {
                 throw new NotFoundException("User not found");
             }
-            return user;
+            return new GetUserDto() { Id = user.Id, Name = user.Name, Description = user.Description };
         }
 
         public async Task<UpdatedUserDto> AsyncUpdateOneUser(int id, UpdateUserDto updateUserDto)
@@ -79,7 +91,7 @@ namespace chat.Services
                 throw new BadRequestException("Nothing to modify");
             }
 
-            User user = await AsyncGetOneUser(id);
+            User user = await AsyncGetUserInstanceById(id);
             if (user == null)
             {
                 throw new NotFoundException("User not found");
@@ -100,12 +112,22 @@ namespace chat.Services
 
             UpdatedUserDto response = new UpdatedUserDto()
             {
+                Id = user.Id,
                 Description = user.Description,
-                Login = user.Login,
                 Name = user.Name
             };
 
             return response;
+        }
+
+        private Task<User> AsyncGetUserInstanceById(int id)
+        {
+            return _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        private Task<User> AsyncGetUserInstanceByLogin(string login)
+        {
+            return _context.Users.FirstOrDefaultAsync(x => x.Login == login);
         }
     }
 }

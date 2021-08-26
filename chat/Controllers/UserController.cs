@@ -20,13 +20,13 @@ namespace chat.Controllers
         }
 
         [HttpGet]
-        public Task<IEnumerable<User>> GetAllUsers([FromQuery] QueryPaginationDto query)
+        public Task<IEnumerable<GetUserDto>> GetAllUsers([FromQuery] QueryPaginationDto query)
         {
             return _userService.AsyncGetAllUsers(query);
         }
 
         [HttpGet("{id}")]
-        public Task<User> GetUser(int id)
+        public Task<GetUserDto> GetUser(int id)
         {
             return _userService.AsyncGetOneUser(id);
         }

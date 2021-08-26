@@ -60,7 +60,7 @@ namespace chat
             {
                 var recievedException = context.Features.Get<IExceptionHandlerPathFeature>().Error;
 
-                BasicException exception = new InternalErrorException("Something went wrong");
+                BasicException exception = new InternalErrorException(recievedException.Message);
 
                 if (recievedException is BasicException)
                 {

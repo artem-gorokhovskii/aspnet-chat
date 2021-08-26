@@ -1,6 +1,5 @@
 ﻿using chat.Dto;
 using chat.DTO;
-using chat.Entities;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,9 +7,9 @@ namespace chat.Services
 {
     interface IUserService
     {
-        Task<IEnumerable<User>> AsyncGetAllUsers(QueryPaginationDto query);
+        Task<IEnumerable<GetUserDto>> AsyncGetAllUsers(QueryPaginationDto query);
 
-        Task<User> AsyncGetOneUser(int id);
+        Task<GetUserDto> AsyncGetOneUser(int id);
 
         Task<CreatedUserDto> AsyncCreateOneUser(CreateUserDto createUserDto);
 
