@@ -31,6 +31,7 @@ namespace chat
                 opt.UseNpgsql(Configuration.GetSection("ChatApp")["DbConnection"]));
 
             services.AddTransient<UserService>();
+            services.AddTransient<AuthorizationService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

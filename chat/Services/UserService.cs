@@ -13,9 +13,12 @@ namespace chat.Services
     public class UserService : IUserService
     {
         ChatContext _context;
-        public UserService(ChatContext context)
+        AuthorizationService _authorizationService;
+
+        public UserService(ChatContext context, AuthorizationService authorizationService)
         {
             _context = context;
+            _authorizationService = authorizationService;
         }
 
         public async Task<User> AsyncCreateOneUser(CreateUserDto createUserDto)
@@ -25,7 +28,7 @@ namespace chat.Services
                 Description = createUserDto.Description,
                 Login = createUserDto.Login,
                 Name = createUserDto.Name,
-                Password = createUserDto.Password
+                Password = _authorizationService.GenerateHashFromPassword(createUserDto.Password)
             };
 
             _context.Users.Add(user);
