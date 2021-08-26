@@ -12,9 +12,9 @@ namespace chat.Services
 
         Task<User> AsyncGetOneUser(int id);
 
-        Task<User> AsyncCreateOneUser(CreateUserDto createUserDto);
+        Task<CreatedUserDto> AsyncCreateOneUser(CreateUserDto createUserDto);
 
-        Task<User> AsyncUpdateOneUser(int id, UpdateUserDto updateUserDto);
+        Task<UpdatedUserDto> AsyncUpdateOneUser(int id, UpdateUserDto updateUserDto);
 
         Task AsyncDeleteOneUser(int id);
     }

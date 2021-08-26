@@ -21,7 +21,7 @@ namespace chat.Services
             _authorizationService = authorizationService;
         }
 
-        public async Task<User> AsyncCreateOneUser(CreateUserDto createUserDto)
+        public async Task<CreatedUserDto> AsyncCreateOneUser(CreateUserDto createUserDto)
         {
             User user = new User()
             {
@@ -33,7 +33,15 @@ namespace chat.Services
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            return user;
+
+            CreatedUserDto response = new CreatedUserDto()
+            {
+                Description = user.Description,
+                Login = user.Login,
+                Name = user.Name
+            };
+
+            return response;
         }
 
         public async Task AsyncDeleteOneUser(int id)
@@ -64,7 +72,7 @@ namespace chat.Services
             return user;
         }
 
-        public async Task<User> AsyncUpdateOneUser(int id, UpdateUserDto updateUserDto)
+        public async Task<UpdatedUserDto> AsyncUpdateOneUser(int id, UpdateUserDto updateUserDto)
         {
             if (updateUserDto.Description == null && updateUserDto.Name == null)
             {
@@ -89,7 +97,15 @@ namespace chat.Services
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
-            return user;
+
+            UpdatedUserDto response = new UpdatedUserDto()
+            {
+                Description = user.Description,
+                Login = user.Login,
+                Name = user.Name
+            };
+
+            return response;
         }
     }
 }

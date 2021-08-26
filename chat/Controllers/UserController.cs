@@ -32,7 +32,7 @@ namespace chat.Controllers
         }
 
         [HttpPost]
-        public Task<User> CreateUser([FromBody] CreateUserDto createUserDto)
+        public Task<CreatedUserDto> CreateUser([FromBody] CreateUserDto createUserDto)
         {
             return _userService.AsyncCreateOneUser(createUserDto);
         }
@@ -44,7 +44,7 @@ namespace chat.Controllers
         }
 
         [HttpPatch("{id}")]
-        public Task<User> UpdateUser(int id, [FromBody] UpdateUserDto updateUserDto)
+        public Task<UpdatedUserDto> UpdateUser(int id, [FromBody] UpdateUserDto updateUserDto)
         {
             return _userService.AsyncUpdateOneUser(id, updateUserDto);
         }
