@@ -33,21 +33,21 @@ namespace chat.Controllers
             return _userService.AsyncGetOneUser(id);
         }
 
-        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "AdminRole")]
         [HttpPatch("{id}")]
         public Task<UpdatedUserDto> UpdateUser(int id, [FromBody] UpdateUserDto updateUserDto)
         {
             return _userService.AsyncUpdateOneUser(id, updateUserDto);
         }
 
-        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "AdminRole")]
         [HttpPost]
         public Task<CreatedUserDto> CreateUser([FromBody] CreateUserDto createUserDto)
         {
             return _userService.AsyncCreateOneUser(createUserDto);
         }
 
-        [Authorize(Policy = "Admin")]
+        [Authorize(Policy = "AdminRole")]
         [HttpDelete("{id}")]
         public Task RemoveUser(int id)
         {
