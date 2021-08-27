@@ -16,7 +16,6 @@ namespace chat.Services
 {
     public class AuthorizationService : IAuthorizationService
     {
-        private readonly IConfiguration _config;
         private readonly string salt = "";
         private readonly string authTokenSecret = "";
         private readonly int authTokenLifetime = 60 * 24; // 1 day
@@ -27,7 +26,6 @@ namespace chat.Services
 
         public AuthorizationService(IConfiguration config, ChatContext context)
         {
-            _config = config;
             _context = context;
 
             salt = config.GetSection("ChatApp")["PasswordSalt"];

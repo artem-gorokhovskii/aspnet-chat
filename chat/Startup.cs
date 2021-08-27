@@ -1,6 +1,8 @@
 using chat.DAL;
 using chat.Exceptions;
+using chat.Policy;
 using chat.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -9,9 +11,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
+using System.Text;
 
 namespace chat
 {
@@ -32,6 +37,43 @@ namespace chat
 
             services.AddTransient<UserService>();
             services.AddTransient<AuthorizationService>();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("UserRole", policy => {
+                    policy.RequireAuthenticatedUser();
+                });
+
+                options.AddPolicy("AdminRole", policy => {
+                    policy.RequireAuthenticatedUser();
+                });
+            });
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.RequireHttpsMetadata = true;
+                options.SaveToken = true;
+
+                // https://stackoverflow.com/questions/44179525/asp-net-core-jwt-bearer-token-custom-validation
+                var validationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("ChatApp")["AuthTokenSecret"])),
+                    ValidateIssuer = true,
+                    ValidIssuer = Configuration.GetSection("ChatApp")["AuthTokenIssuer"],
+                    ValidateAudience = true,
+                    ValidAudience = Configuration.GetSection("ChatApp")["AuthTokenAudience"],
+                    ValidateLifetime = true,
+                };
+                options.TokenValidationParameters = validationParameters;
+            });
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -84,6 +126,7 @@ namespace chat
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

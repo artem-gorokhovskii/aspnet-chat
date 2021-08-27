@@ -1,6 +1,7 @@
 ﻿using chat.Dto;
 using chat.DTO;
 using chat.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,34 +19,39 @@ namespace chat.Controllers
             _userService = userService;
         }
 
+        [Authorize(Policy = "UserRole")]
         [HttpGet]
         public Task<IEnumerable<GetUserDto>> GetAllUsers([FromQuery] QueryPaginationDto query)
         {
             return _userService.AsyncGetAllUsers(query);
         }
 
+        [Authorize(Policy = "UserRole")]
         [HttpGet("{id}")]
         public Task<GetUserDto> GetUser(int id)
         {
             return _userService.AsyncGetOneUser(id);
         }
 
+        [Authorize(Policy = "Admin")]
+        [HttpPatch("{id}")]
+        public Task<UpdatedUserDto> UpdateUser(int id, [FromBody] UpdateUserDto updateUserDto)
+        {
+            return _userService.AsyncUpdateOneUser(id, updateUserDto);
+        }
+
+        [Authorize(Policy = "Admin")]
         [HttpPost]
         public Task<CreatedUserDto> CreateUser([FromBody] CreateUserDto createUserDto)
         {
             return _userService.AsyncCreateOneUser(createUserDto);
         }
 
+        [Authorize(Policy = "Admin")]
         [HttpDelete("{id}")]
         public Task RemoveUser(int id)
         {
             return _userService.AsyncDeleteOneUser(id);
-        }
-
-        [HttpPatch("{id}")]
-        public Task<UpdatedUserDto> UpdateUser(int id, [FromBody] UpdateUserDto updateUserDto)
-        {
-            return _userService.AsyncUpdateOneUser(id, updateUserDto);
         }
     }
 }
